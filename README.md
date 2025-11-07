@@ -54,4 +54,4 @@ This server hosts the HTML/JavaScript files that users interact with.
 * `dashboard.html`: Simulated Security Analysis and Log History Dashboard.
 * `security_logger.js`: Frontend logic, including brute force tracking and log transmission.
 * `requirements.txt`: Python dependencies (Flask, Flask-CORS).
-* `.gitignore`: Tells Git to ignore `application_logs.jsonl`, `__pycache__`, etc.
+* `.gitignore`: Tells Git to ignore `application_logs.jsonl`, `__pycache__`, etc."# security-log-app" 
