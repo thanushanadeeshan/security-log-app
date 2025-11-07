@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Analysis Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); margin-bottom: 20px; }
+        .warning-box { border-left: 5px solid #ffc107; background: #fffbe6; padding: 15px; margin-top: 15px; }
+        .critical-box { border-left: 5px solid #dc3545; background: #f8d7da; padding: 15px; margin-top: 15px; color: #721c24; }
+        .info-box { border-left: 5px solid #28a745; background: #d4edda; padding: 15px; margin-top: 15px; color: #155724; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .status-indicator { font-weight: bold; }
+        .status-indicator.CRITICAL { color: #dc3545; }
+        .status-indicator.WARNING { color: #ffc107; }
+        .status-indicator.INFO { color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Real-Time Security Analysis Dashboard</h1>
+        <p>This simulates the output of a live ML/User Behavior Analytics (UBA) engine based on recent log attempts.</p>
+
+        <div class="card">
+            <h2>User Behavior Summary</h2>
+            <div id="uba-output">
+                </div>
+            <p><a href="index.html">← Return to Login Page to Generate More Logs</a></p>
+        </div>
+
+        <div class="card">
+            <h2>Recent Log History (Last 10 Attempts)</h2>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table id="log-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User ID</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                            <th>Level</th>
+                            <th>Event Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logHistory = JSON.parse(sessionStorage.getItem('logHistory')) || [];
+            const ubaOutput = document.getElementById('uba-output');
+            const logTableBody = document.querySelector('#log-table tbody');
+            
+            if (logHistory.length === 0) {
+                ubaOutput.innerHTML = '<p class="info-box">No log attempts recorded in this session yet.</p>';
+                return;
+            }
+
+            // --- 1. User Behavior Analysis (Simulated) ---
+            const failedAttempts = {};
+            const ipsUsed = new Set();
+            let criticalFound = false;
+
+            logHistory.forEach(log => {
+                if (!log.is_successful) {
+                    failedAttempts[log.user_id] = (failedAttempts[log.user_id] || 0) + 1;
+                }
+                ipsUsed.add(log['src-ip']);
+                if (log.level === 'CRITICAL') {
+                    criticalFound = true;
+                }
+            });
+
+            // --- Analyze and Display Warnings ---
+            let analysisHTML = '';
+            
+            // A. Brute Force/High Failure Check
+            const highFailureUsers = Object.entries(failedAttempts).filter(([user, count]) => count >= 3);
+            if (criticalFound || highFailureUsers.length > 0) {
+                const attackType = criticalFound ? "Brute Force Attack (Aggressive Pattern)" : "Suspicious Login Failures";
+                analysisHTML += `<div class="critical-box">
+                    <h4>🚨 **CRITICAL WARNING: ${attackType}**</h4>
+                    <p>Potential Threat: **${attackType}**.</p>
+                    <p>Details: Multiple failed logins detected. User attempts may indicate a **credential stuffing** or **brute force** attack.</p>
+                    <p>Affected Users/IPs: ${highFailureUsers.map(([u, c]) => `${u} (${c} fails)`).join(', ') || 'N/A'}</p>
+                </div>`;
+            } else {
+                analysisHTML += '<div class="info-box"><h4>✓ Behavior Baseline: Normal</h4><p>No major deviations or sustained high failure rates observed.</p></div>';
+            }
+
+            // B. Insider Crime/Anomalous User Behavior Check (Simulated)
+            const insiderCheckUser = logHistory.find(log => log.user_id === 'admin' && log.is_successful && log.failed_count_user > 0);
+            if (insiderCheckUser) {
+                 analysisHTML += `<div class="warning-box">
+                    <h4>⚠️ **WARNING: Insider Anomaly Detected**</h4>
+                    <p>Details: User **${insiderCheckUser.user_id}** successfully logged in immediately after **${insiderCheckUser.failed_count_user}** failed attempts.</p>
+                    <p>Attack Type: **Account Compromise/Insider Theft.** This pattern suggests the user was guessing the password or using compromised credentials, then immediately succeeding. This is a common pattern for *insider crime staff* or *compromised accounts*.</p>
+                </div>`;
+            }
+            
+            ubaOutput.innerHTML = analysisHTML;
+
+
+            // --- 2. Recent Log History Table ---
+            const recentLogs = logHistory.slice(-10).reverse(); // Get last 10, newest first
+            recentLogs.forEach(log => {
+                const row = logTableBody.insertRow();
+                row.insertCell().textContent = new Date(log.timestamp).toLocaleTimeString();
+                row.insertCell().textContent = log.user_id;
+                row.insertCell().textContent = log['src-ip'];
+                row.insertCell().textContent = log.action;
+                row.insertCell().innerHTML = `<span class="status-indicator ${log.level}">${log.level}</span>`;
+                row.insertCell().textContent = log.event_type;
+            });
+        });
+    </script>
+</body>
+</html>
