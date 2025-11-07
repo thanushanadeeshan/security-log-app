@@ -2,7 +2,8 @@
 
 const MAX_ATTEMPTS = 5; 
 const SUCCESS_PASSWORDS = ["0391", "0561", "0586"];
-const LOG_ENDPOINT = 'http://127.0.0.1:5000/api/log_collector'; 
+const LOG_ENDPOINT = 'https://my-log-collector-flask.onrender.com/api/log_collector';
+//const LOG_ENDPOINT = 'http://127.0.0.1:5000/api/log_collector'; 
 const REDIRECT_DASHBOARD = 'dashboard.html';
 
 // Load or initialize failed attempts and log history from session storage
